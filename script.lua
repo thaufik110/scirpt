@@ -1,53 +1,55 @@
--- 1. Mendapatkan referensi ke GUI pemain lokal
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+-- Inisialisasi Table utama sebagai Library
+local MyCustomUI = {}
 
--- 2. Membuat Wadah Utama (ScreenGui)
-local myScreenGui = Instance.new("ScreenGui")
-myScreenGui.Name = "MyCustomGUI"
-myScreenGui.ResetOnSpawn = false -- Agar UI tidak hilang saat karakter mati
-myScreenGui.Parent = playerGui
-
--- 3. Membuat Latar Belakang (Frame)
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
--- UDim2.new(X Scale, X Offset, Y Scale, Y Offset)
-mainFrame.Size = UDim2.new(0, 300, 0, 200) -- Ukuran 300x200 pixel
-mainFrame.Position = UDim2.new(0.5, -150, 0.5, -100) -- Posisikan tepat di tengah layar
-mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Warna abu-abu gelap
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = myScreenGui
-
--- (Opsional) Menambahkan sudut melengkung agar terlihat modern
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 10)
-uiCorner.Parent = mainFrame
-
--- 4. Membuat Tombol (TextButton)
-local myButton = Instance.new("TextButton")
-myButton.Name = "ClickMeButton"
-myButton.Size = UDim2.new(0, 200, 0, 50)
-myButton.Position = UDim2.new(0.5, -100, 0.5, -25) -- Di tengah dalam Frame
-myButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255) -- Warna biru
-myButton.Text = "Klik Saya!"
-myButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-myButton.Font = Enum.Font.GothamBold
-myButton.TextSize = 18
-myButton.Parent = mainFrame
-
--- (Opsional) Sudut melengkung untuk tombol
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 8)
-btnCorner.Parent = myButton
-
--- 5. Menambahkan Logika saat Tombol Diklik
-myButton.MouseButton1Click:Connect(function()
-    print("Tombol berhasil diklik!")
-    myButton.Text = "Sedang Memproses..."
-    myButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100) -- Berubah jadi hijau
+-- 1. Fungsi untuk membuat Window Utama
+function MyCustomUI:CreateWindow(title)
+    -- Di sini kamu membuat Instance.new("ScreenGui") dan "Frame" utama
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MyHubGUI"
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
-    wait(1) -- Jeda 1 detik
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 450, 0, 300)
+    mainFrame.Position = UDim2.new(0.5, -225, 0.5, -150)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    mainFrame.Parent = screenGui
     
-    myButton.Text = "Klik Saya!"
-    myButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255) -- Kembali biru
-end)
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Text = title
+    titleLabel.Size = UDim2.new(1, 0, 0, 30)
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Parent = mainFrame
+
+    -- Table untuk menyimpan fungsi-fungsi yang ada di dalam Window ini
+    local WindowAPI = {}
+
+    -- 2. Fungsi untuk membuat Tab di dalam Window
+    function WindowAPI:CreateTab(tabName)
+        -- Di sini biasanya kamu membuat Frame baru yang bertindak sebagai halaman tab
+        -- dan tombol navigasi untuk membuka tab ini
+        
+        -- Table untuk menyimpan elemen di dalam Tab ini
+        local TabAPI = {}
+        
+        -- 3. Fungsi untuk membuat elemen interaktif di dalam Tab
+        function TabAPI:CreateButton(btnText, callback)
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(0, 200, 0, 35)
+            button.Position = UDim2.new(0.5, -100, 0.5, 0) -- Nanti diganti pakai UIListLayout agar otomatis rapi
+            button.Text = btnText
+            button.Parent = mainFrame -- Seharusnya masuk ke dalam Frame Tab
+            
+            -- Menjalankan fungsi panggil balik (callback) saat diklik
+            button.MouseButton1Click:Connect(function()
+                pcall(callback) -- pcall mencegah script error jika fungsi callback bermasalah
+            end)
+        end
+        
+        return TabAPI -- Kembalikan fungsi Tab agar bisa di-chain
+    end
+
+    return WindowAPI -- Kembalikan fungsi Window
+end
+
+return MyCustomUI
