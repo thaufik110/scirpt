@@ -1,9 +1,9 @@
--- Inisialisasi Table utama sebagai Library
+-- ==========================================
+-- BAGIAN 1: PEMBUATAN LIBRARY (PABRIK UI)
+-- ==========================================
 local MyCustomUI = {}
 
--- 1. Fungsi untuk membuat Window Utama
 function MyCustomUI:CreateWindow(title)
-    -- Di sini kamu membuat Instance.new("ScreenGui") dan "Frame" utama
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "MyHubGUI"
     screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -21,35 +21,37 @@ function MyCustomUI:CreateWindow(title)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Parent = mainFrame
 
-    -- Table untuk menyimpan fungsi-fungsi yang ada di dalam Window ini
     local WindowAPI = {}
 
-    -- 2. Fungsi untuk membuat Tab di dalam Window
     function WindowAPI:CreateTab(tabName)
-        -- Di sini biasanya kamu membuat Frame baru yang bertindak sebagai halaman tab
-        -- dan tombol navigasi untuk membuka tab ini
-        
-        -- Table untuk menyimpan elemen di dalam Tab ini
         local TabAPI = {}
         
-        -- 3. Fungsi untuk membuat elemen interaktif di dalam Tab
         function TabAPI:CreateButton(btnText, callback)
             local button = Instance.new("TextButton")
             button.Size = UDim2.new(0, 200, 0, 35)
-            button.Position = UDim2.new(0.5, -100, 0.5, 0) -- Nanti diganti pakai UIListLayout agar otomatis rapi
+            button.Position = UDim2.new(0.5, -100, 0.5, 0) 
             button.Text = btnText
-            button.Parent = mainFrame -- Seharusnya masuk ke dalam Frame Tab
+            button.Parent = mainFrame 
             
-            -- Menjalankan fungsi panggil balik (callback) saat diklik
             button.MouseButton1Click:Connect(function()
-                pcall(callback) -- pcall mencegah script error jika fungsi callback bermasalah
+                pcall(callback) 
             end)
         end
         
-        return TabAPI -- Kembalikan fungsi Tab agar bisa di-chain
+        return TabAPI 
     end
 
-    return WindowAPI -- Kembalikan fungsi Window
+    return WindowAPI 
 end
 
-return MyCustomUI
+-- ==========================================
+-- BAGIAN 2: EKSEKUSI (MEMERINTAHKAN PABRIK)
+-- ==========================================
+-- Nah, bagian di bawah inilah yang membuat UI-nya benar-benar digambar di layar!
+
+local WindowSaya = MyCustomUI:CreateWindow("Aplikasi Kerenku")
+local TabSatu = WindowSaya:CreateTab("Menu Utama")
+
+TabSatu:CreateButton("Klik Tombol Ini", function()
+    print("Mantap! Tombolnya berfungsi dan library-mu berjalan.")
+end)
