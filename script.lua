@@ -323,14 +323,17 @@ end)
 -- 4. Isi Tab Player (Dengan Slider Baru!)
 TabPlayer:CreateSlider("Kecepatan Berjalan (WalkSpeed)", 16, 250, 16, function(nilai)
     print("Walkspeed diubah menjadi:", nilai)
-    -- Uncomment baris di bawah ini jika ingin langsung efek ke karakter
-    -- game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = nilai
+    
+    -- Tanda '--' sudah dihapus, sekarang kodenya aktif!
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = nilai
 end)
 
 TabPlayer:CreateSlider("Tinggi Lompatan (JumpPower)", 50, 500, 50, function(nilai)
     print("JumpPower diubah menjadi:", nilai)
-    -- Uncomment baris di bawah ini jika ingin langsung efek ke karakter
-    -- game.Players.LocalPlayer.Character.Humanoid.JumpPower = nilai
+    
+    -- Tanda '--' sudah dihapus, sekarang kodenya aktif!
+    game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true -- Wajib ditambahkan untuk game Roblox versi baru
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = nilai
 end)
 
 -- 5. Isi Tab Settings
