@@ -1,8 +1,12 @@
 -- ==========================================
--- BAGIAN 1: PEMBUATAN LIBRARY (PABRIK UI)
+-- 🛠️ INISIALISASI LIBRARY & SERVICES
 -- ==========================================
 local MyCustomUI = {}
+local UserInputService = game:GetService("UserInputService")
 
+-- ==========================================
+-- 🖥️ FUNGSI MEMBUAT WINDOW UTAMA
+-- ==========================================
 function MyCustomUI:CreateWindow(title)
     -- 1. Setup Layar Utama
     local screenGui = Instance.new("ScreenGui")
@@ -16,12 +20,11 @@ function MyCustomUI:CreateWindow(title)
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
     
-    -- Memperhalus sudut MainFrame
     local uiCorner = Instance.new("UICorner")
     uiCorner.CornerRadius = UDim.new(0, 6)
     uiCorner.Parent = mainFrame
 
-    -- 2. Setup TopBar (Judul)
+    -- 2. Setup TopBar (Untuk Judul & Area Drag)
     local topBar = Instance.new("Frame")
     topBar.Size = UDim2.new(1, 0, 0, 30)
     topBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -37,7 +40,37 @@ function MyCustomUI:CreateWindow(title)
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = topBar
 
-    -- 3. Setup Sidebar (Wadah untuk Tombol Tab)
+    -- 🖱️ LOGIKA DRAG (MENGGESER UI)
+    local dragging, dragInput, dragStart, startPos
+
+    topBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    topBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    -- 3. Setup Sidebar (Menu Kiri)
     local sidebar = Instance.new("Frame")
     sidebar.Size = UDim2.new(0, 130, 1, -30)
     sidebar.Position = UDim2.new(0, 0, 0, 30)
@@ -45,13 +78,12 @@ function MyCustomUI:CreateWindow(title)
     sidebar.BorderSizePixel = 0
     sidebar.Parent = mainFrame
 
-    -- Ini sihirnya: otomatis menyusun tombol Tab ke bawah
     local sidebarLayout = Instance.new("UIListLayout")
     sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
     sidebarLayout.Padding = UDim.new(0, 2)
     sidebarLayout.Parent = sidebar
 
-    -- 4. Setup Wadah Halaman (Tempat isi Tab ditampilkan)
+    -- 4. Setup Wadah Halaman Konten
     local pagesContainer = Instance.new("Frame")
     pagesContainer.Size = UDim2.new(1, -130, 1, -30)
     pagesContainer.Position = UDim2.new(0, 130, 0, 30)
@@ -59,13 +91,12 @@ function MyCustomUI:CreateWindow(title)
     pagesContainer.Parent = mainFrame
 
     local WindowAPI = {}
-    local isFirstTab = true -- Untuk mengecek tab pertama yang harus dibuka
+    local isFirstTab = true
 
     -- ==========================================
-    -- FUNGSI MEMBUAT TAB
+    -- 📁 FUNGSI MEMBUAT TAB BARU
     -- ==========================================
     function WindowAPI:CreateTab(tabName)
-        -- Membuat Tombol Navigasi di Sidebar
         local tabBtn = Instance.new("TextButton")
         tabBtn.Size = UDim2.new(1, 0, 0, 35)
         tabBtn.Text = tabName
@@ -75,37 +106,34 @@ function MyCustomUI:CreateWindow(title)
         tabBtn.BorderSizePixel = 0
         tabBtn.Parent = sidebar
 
-        -- Membuat Halaman yang bisa di-scroll untuk Tab ini
         local tabPage = Instance.new("ScrollingFrame")
         tabPage.Size = UDim2.new(1, -10, 1, -10)
         tabPage.Position = UDim2.new(0, 5, 0, 5)
         tabPage.BackgroundTransparency = 1
         tabPage.ScrollBarThickness = 4
         tabPage.BorderSizePixel = 0
-        tabPage.Visible = isFirstTab -- Hanya tab pertama yang langsung terlihat
+        tabPage.Visible = isFirstTab
         tabPage.Parent = pagesContainer
 
-        -- Sihir kedua: otomatis menyusun elemen di dalam Tab ini
         local pageLayout = Instance.new("UIListLayout")
         pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
         pageLayout.Padding = UDim.new(0, 6)
         pageLayout.Parent = tabPage
 
+        -- Tampilan Tab Aktif Default
         if isFirstTab then
             isFirstTab = false
             tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            tabBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 255) -- Warna aktif
+            tabBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
         end
 
-        -- Logika ketika Tab diklik (Sistem Routing)
+        -- Logika Pindah Tab
         tabBtn.MouseButton1Click:Connect(function()
-            -- Sembunyikan semua halaman
             for _, child in pairs(pagesContainer:GetChildren()) do
                 if child:IsA("ScrollingFrame") then
                     child.Visible = false
                 end
             end
-            -- Reset warna semua tombol tab
             for _, child in pairs(sidebar:GetChildren()) do
                 if child:IsA("TextButton") then
                     child.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -113,7 +141,6 @@ function MyCustomUI:CreateWindow(title)
                 end
             end
             
-            -- Tampilkan halaman ini dan tandai tombolnya
             tabPage.Visible = true
             tabBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
             tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -122,17 +149,16 @@ function MyCustomUI:CreateWindow(title)
         local TabAPI = {}
         
         -- ==========================================
-        -- FUNGSI MEMBUAT TOMBOL DALAM TAB
+        -- 🔘 FUNGSI MEMBUAT TOMBOL BIASA
         -- ==========================================
         function TabAPI:CreateButton(btnText, callback)
             local button = Instance.new("TextButton")
-            -- Lebarnya otomatis mengikuti wadah, tingginya 35
             button.Size = UDim2.new(1, -10, 0, 35) 
             button.Text = btnText
             button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
             button.TextColor3 = Color3.fromRGB(255, 255, 255)
             button.Font = Enum.Font.Gotham
-            button.Parent = tabPage -- Masukkan ke dalam halaman Tab
+            button.Parent = tabPage
 
             local btnCorner = Instance.new("UICorner")
             btnCorner.CornerRadius = UDim.new(0, 4)
@@ -140,6 +166,49 @@ function MyCustomUI:CreateWindow(title)
 
             button.MouseButton1Click:Connect(function()
                 pcall(callback) 
+            end)
+        end
+
+        -- ==========================================
+        -- 🎚️ FUNGSI MEMBUAT TOGGLE (ON/OFF)
+        -- ==========================================
+        function TabAPI:CreateToggle(tglText, defaultState, callback)
+            local state = defaultState or false
+            
+            local toggleFrame = Instance.new("Frame")
+            toggleFrame.Size = UDim2.new(1, -10, 0, 35)
+            toggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            toggleFrame.Parent = tabPage
+            
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 4)
+            uiCorner.Parent = toggleFrame
+            
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, -50, 1, 0)
+            label.Position = UDim2.new(0, 10, 0, 0)
+            label.BackgroundTransparency = 1
+            label.Text = tglText
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.Font = Enum.Font.Gotham
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Parent = toggleFrame
+            
+            local checkBtn = Instance.new("TextButton")
+            checkBtn.Size = UDim2.new(0, 25, 0, 25)
+            checkBtn.Position = UDim2.new(1, -35, 0.5, -12.5)
+            checkBtn.Text = ""
+            checkBtn.BackgroundColor3 = state and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(30, 30, 30)
+            checkBtn.Parent = toggleFrame
+            
+            local checkCorner = Instance.new("UICorner")
+            checkCorner.CornerRadius = UDim.new(0, 4)
+            checkCorner.Parent = checkBtn
+            
+            checkBtn.MouseButton1Click:Connect(function()
+                state = not state 
+                checkBtn.BackgroundColor3 = state and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(30, 30, 30)
+                pcall(callback, state) 
             end)
         end
         
@@ -150,24 +219,34 @@ function MyCustomUI:CreateWindow(title)
 end
 
 -- ==========================================
--- CARA MENGGUNAKAN LIBRARY VERSI 2
+-- 🚀 AREA EKSEKUSI (PENGGUNAAN LIBRARY)
 -- ==========================================
+
+-- 1. Buat Window
 local WindowSaya = MyCustomUI:CreateWindow("Exploit Hub Premium")
 
--- Bikin 2 Kategori (Tab)
+-- 2. Buat Tab
 local TabUtama = WindowSaya:CreateTab("Main")
 local TabSetting = WindowSaya:CreateTab("Settings")
 
--- Isi Tab Utama
-TabUtama:CreateButton("Aktifkan Auto-Farm", function()
-    print("Auto-Farm Berjalan!")
+-- 3. Isi Tab Utama dengan Tombol & Toggle
+TabUtama:CreateButton("Beri Saya Uang", function()
+    print("Mengeksekusi cheat uang...")
 end)
 
-TabUtama:CreateButton("Teleport ke Spawn", function()
-    print("Menteleportasi pemain...")
+TabUtama:CreateToggle("Auto-Farm", false, function(kondisi)
+    if kondisi then
+        print("Auto-Farm: ON")
+    else
+        print("Auto-Farm: OFF")
+    end
 end)
 
--- Isi Tab Setting
+TabUtama:CreateToggle("ESP Benda", true, function(kondisi)
+    print("Status ESP saat ini:", kondisi)
+end)
+
+-- 4. Isi Tab Settings
 TabSetting:CreateButton("Hancurkan GUI", function()
-    game.Players.LocalPlayer.PlayerGui.MyHubGUI:Destroy()
+    game.Players.LocalPlayer.PlayerGui:FindFirstChild("MyHubGUI"):Destroy()
 end)
