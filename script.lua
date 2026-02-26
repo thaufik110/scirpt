@@ -143,7 +143,7 @@ function MyCustomUI:CreateWindow(title)
         local TabAPI = {}
         
         -- ==========================================
-        -- 🔘 FUNGSI MEMBUAT TOMBOL BIASA
+        -- 🔘 FUNGSI MEMBUAT TOMBOL
         -- ==========================================
         function TabAPI:CreateButton(btnText, callback)
             local button = Instance.new("TextButton")
@@ -207,7 +207,7 @@ function MyCustomUI:CreateWindow(title)
         end
 
         -- ==========================================
-        -- 🎛️ FUNGSI MEMBUAT SLIDER (PENGATUR ANGKA)
+        -- 🎛️ FUNGSI MEMBUAT SLIDER
         -- ==========================================
         function TabAPI:CreateSlider(slText, min, max, defaultState, callback)
             local value = math.clamp(defaultState, min, max)
@@ -292,6 +292,117 @@ function MyCustomUI:CreateWindow(title)
                 end
             end)
         end
+
+        -- ==========================================
+        -- 📋 FUNGSI MEMBUAT DROPDOWN (PILIHAN)
+        -- ==========================================
+        function TabAPI:CreateDropdown(dropText, options, callback)
+            local dropFrame = Instance.new("Frame")
+            dropFrame.Size = UDim2.new(1, -10, 0, 35)
+            dropFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            dropFrame.ClipsDescendants = true -- Agar isi list terpotong saat ditutup
+            dropFrame.Parent = tabPage
+            
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 4)
+            uiCorner.Parent = dropFrame
+
+            -- Tombol Utama Dropdown
+            local mainDropBtn = Instance.new("TextButton")
+            mainDropBtn.Size = UDim2.new(1, 0, 0, 35)
+            mainDropBtn.BackgroundTransparency = 1
+            mainDropBtn.Text = "  " .. dropText .. " : -"
+            mainDropBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            mainDropBtn.Font = Enum.Font.Gotham
+            mainDropBtn.TextXAlignment = Enum.TextXAlignment.Left
+            mainDropBtn.Parent = dropFrame
+
+            -- Wadah untuk isi list
+            local itemContainer = Instance.new("Frame")
+            itemContainer.Size = UDim2.new(1, 0, 1, -35)
+            itemContainer.Position = UDim2.new(0, 0, 0, 35)
+            itemContainer.BackgroundTransparency = 1
+            itemContainer.Parent = dropFrame
+
+            local listLayout = Instance.new("UIListLayout")
+            listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            listLayout.Parent = itemContainer
+
+            local isOpen = false
+
+            -- Logika buka/tutup
+            mainDropBtn.MouseButton1Click:Connect(function()
+                isOpen = not isOpen
+                if isOpen then
+                    -- Ukuran 35 (tombol) + jumlah opsi dikali 30 (tinggi opsi)
+                    local totalHeight = 35 + (#options * 30)
+                    dropFrame.Size = UDim2.new(1, -10, 0, totalHeight)
+                else
+                    dropFrame.Size = UDim2.new(1, -10, 0, 35)
+                end
+            end)
+
+            -- Membuat opsi-opsinya
+            for _, option in ipairs(options) do
+                local optBtn = Instance.new("TextButton")
+                optBtn.Size = UDim2.new(1, 0, 0, 30)
+                optBtn.Text = "    " .. option
+                optBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                optBtn.Font = Enum.Font.Gotham
+                optBtn.TextXAlignment = Enum.TextXAlignment.Left
+                optBtn.BorderSizePixel = 0
+                optBtn.Parent = itemContainer
+
+                optBtn.MouseButton1Click:Connect(function()
+                    mainDropBtn.Text = "  " .. dropText .. " : " .. option
+                    isOpen = false
+                    dropFrame.Size = UDim2.new(1, -10, 0, 35) -- Tutup setelah milih
+                    pcall(callback, option)
+                end)
+            end
+        end
+
+        -- ==========================================
+        -- ✍️ FUNGSI MEMBUAT TEXTBOX (KOLOM KETIK)
+        -- ==========================================
+        function TabAPI:CreateTextBox(boxText, placeholder, callback)
+            local boxFrame = Instance.new("Frame")
+            boxFrame.Size = UDim2.new(1, -10, 0, 35)
+            boxFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            boxFrame.Parent = tabPage
+            
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 4)
+            uiCorner.Parent = boxFrame
+            
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(0.5, 0, 1, 0)
+            label.Position = UDim2.new(0, 10, 0, 0)
+            label.BackgroundTransparency = 1
+            label.Text = boxText
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.Font = Enum.Font.Gotham
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.Parent = boxFrame
+            
+            local textBox = Instance.new("TextBox")
+            textBox.Size = UDim2.new(0.45, 0, 0, 25)
+            textBox.Position = UDim2.new(0.5, 0, 0.5, -12.5)
+            textBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+            textBox.PlaceholderText = placeholder
+            textBox.Font = Enum.Font.Gotham
+            textBox.Parent = boxFrame
+            
+            local boxCorner = Instance.new("UICorner")
+            boxCorner.CornerRadius = UDim.new(0, 4)
+            boxCorner.Parent = textBox
+            
+            textBox.FocusLost:Connect(function(enterPressed)
+                pcall(callback, textBox.Text)
+            end)
+        end
         
         return TabAPI 
     end
@@ -304,7 +415,7 @@ end
 -- ==========================================
 
 -- 1. Buat Window
-local WindowSaya = MyCustomUI:CreateWindow("Exploit Hub Premium")
+local WindowSaya = MyCustomUI:CreateWindow("Exploit Hub Premium v4")
 
 -- 2. Buat Tab
 local TabUtama = WindowSaya:CreateTab("Main")
@@ -312,33 +423,34 @@ local TabPlayer = WindowSaya:CreateTab("Player")
 local TabSetting = WindowSaya:CreateTab("Settings")
 
 -- 3. Isi Tab Utama
-TabUtama:CreateButton("Beri Saya Uang", function()
-    print("Mengeksekusi cheat uang...")
-end)
-
 TabUtama:CreateToggle("Auto-Farm", false, function(kondisi)
     print("Auto-Farm:", kondisi)
 end)
 
--- 4. Isi Tab Player (Dengan Slider Baru!)
+-- CONTOH PENGGUNAAN DROPDOWN
+TabUtama:CreateDropdown("Pilih Senjata", {"Sword", "Gun", "Bomb", "Meele"}, function(pilihan)
+    print("Kamu memilih senjata:", pilihan)
+    -- Taruh logic mengganti senjata di sini
+end)
+
+-- CONTOH PENGGUNAAN TEXTBOX
+TabUtama:CreateTextBox("Teleport ke Player", "Ketik nama...", function(teksDiketikan)
+    print("Mencoba teleport ke:", teksDiketikan)
+    -- Taruh logic teleport di sini
+end)
+
+-- 4. Isi Tab Player
 TabPlayer:CreateSlider("Kecepatan Berjalan (WalkSpeed)", 16, 250, 16, function(nilai)
-    print("Walkspeed diubah menjadi:", nilai)
-    
-    -- Tanda '--' sudah dihapus, sekarang kodenya aktif!
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = nilai
 end)
 
 TabPlayer:CreateSlider("Tinggi Lompatan (JumpPower)", 50, 500, 50, function(nilai)
-    print("JumpPower diubah menjadi:", nilai)
-    
-    -- Tanda '--' sudah dihapus, sekarang kodenya aktif!
-    game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true -- Wajib ditambahkan untuk game Roblox versi baru
+    game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true 
     game.Players.LocalPlayer.Character.Humanoid.JumpPower = nilai
 end)
 
 -- 5. Isi Tab Settings
 TabSetting:CreateButton("Hancurkan GUI", function()
-    -- Cek apakah GUI ada, lalu hapus
     local gui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("MyHubGUI")
     if gui then
         gui:Destroy()
