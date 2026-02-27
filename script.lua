@@ -1,11 +1,16 @@
--- 1. Panggil Library dari GitHub kamu
-local FarmingLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/newui.lua"))()
+-- 1. Panggil mesin dari GitHub-mu
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/newui.lua"))()
 
--- 2. Langsung buat UI-nya!
-local Window = FarmingLibrary:CreateWindow("⚡ SCRIPT BARU")
-local TabUtama = Window:CreateTab("General", "rbxassetid://6031265976")
+-- 2. Mulai buat UI spesifik untuk game ini
+local Window = Library:CreateWindow("⚡ SCRIPT FISH IT")
 
-TabUtama:CreateSection("Fitur")
-TabUtama:CreateToggle("Auto-Farm", false, function(state)
-    print("Auto-farm nyala?", state)
+-- 3. Buat Tab & Isinya
+local TabUtama = Window:CreateTab("Auto Cast", "rbxassetid://6031265976")
+
+TabUtama:CreateToggle("Auto Mancing", false, function(state)
+    if state then
+        print("Bot pancing aktif!")
+    else
+        print("Bot pancing mati!")
+    end
 end)
