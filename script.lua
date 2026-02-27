@@ -1,10 +1,11 @@
+
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/new.lua"))()
 
 local Window = Library.new({
     Title = "My Script Hub",
     Subtitle = "Premium Edition",
     Size = UDim2.new(0, 600, 0, 400),
-    Theme = "Dark" -- Pilihan: Dark, Midnight, Ocean, Rose
+    Theme = "Dark"
 })
 
 -- Membuat Toggle Button di layar
