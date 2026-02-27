@@ -1,16 +1,27 @@
--- Memanggil Library dari GitHub kamu
-local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/new.lua"))()
+local UILib = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/new.lua"))()
 
--- Inisialisasi (Langsung muncul tanpa loading screen)
-local Window = Lib.new({
-    Title = "He ZhuShi V2.4 Lite",
-    Theme = "Dark"
+local Window = UILib.new({
+    Title = "He ZhuShi Hub",
+    Subtitle = "Premium Edition",
+    Theme = "Dark" -- Pilihan: Dark, Midnight, Ocean, Rose
 })
 
--- Menambah Tab
-local Tab1 = Window:AddTab("Main")
+-- Contoh menambah Tab
+local Tab1 = Window:AddTab({
+    Name = "Main Menu",
+    Icon = "🏠"
+})
 
--- Contoh Menambah Button (Tanpa efek ripple yang berat)
--- Note: Di library asli kamu, fungsi AddButton ada di dalam Section/Tab
--- Sesuaikan dengan struktur metode AddTab yang kamu upload.
-print("Script Aktif!")
+local Section1 = Tab1:AddSection({
+    Title = "Player Settings"
+})
+
+Section1:AddToggle({
+    Text = "Auto Farm",
+    Default = false,
+    Callback = function(v)
+        print("Status: ", v)
+    end
+})
+
+Window:Notify("Library Berhasil Dimuat!")
