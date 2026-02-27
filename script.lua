@@ -1,4 +1,4 @@
-local Library = loadstring(game:HttpGet("url_raw_kode_ini"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/new.lua"))()
 
 local Window = Library.new({
     Title = "My Script Hub",
