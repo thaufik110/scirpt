@@ -1,36 +1,27 @@
-
+-- Memuat Library dari GitHub
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/new.lua"))()
 
+-- 1. Inisialisasi Window Utama
 local Window = Library.new({
-    Title = "My Script Hub",
-    Subtitle = "Premium Edition",
-    Size = UDim2.new(0, 600, 0, 400),
+    Title = "He ZhuShi Premium", -- Menggunakan nickname kamu
+    Subtitle = "V2.4 Lite Edition",
     Theme = "Dark"
 })
 
--- Membuat Toggle Button di layar
-Window:CreateToggleButton({ Icon = "⚡" })
+-- 2. Menambah Tab (misalnya untuk game Fish It atau Lost Saga)
+local MainTab = Window:AddTab("Main Menu")
+local MiscTab = Window:AddTab("Misc")
 
--- Menambah Tab
-local Tab = Window:AddTab({ Name = "Main", Icon = "🏠" })
+-- 3. Menambahkan Elemen ke dalam Tab
+MainTab:AddToggle("Auto Clicker", false, function(v)
+    print("Status: ", v)
+end)
 
--- Menambah Section
-local Section = Tab:AddSection({ Title = "Settings" })
+MainTab:AddButton("Teleport to Base", function()
+    print("Teleporting...")
+end)
 
--- Menambah Elemen
-Section:AddToggle({
-    Text = "Auto Farm",
-    Default = false,
-    Callback = function(Value)
-        print("Auto Farm:", Value)
-    end
-})
+-- 4. Contoh Notification / Toast (Jika fiturnya ada di script GitHub kamu)
+-- Library:Toast({Title = "Success", Message = "Script Loaded!", Type = "Success"})
 
-Section:AddDropdown({
-    Text = "Select Weapon",
-    Items = {"Sword", "Gun", "Knife"},
-    Default = "Sword",
-    Callback = function(Value)
-        print("Selected:", Value)
-    end
-})
+print("UI Berhasil Dimuat!")
