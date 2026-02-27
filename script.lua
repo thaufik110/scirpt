@@ -1,5 +1,5 @@
 -- =====================================================================
--- 🌾 FARMING HUB UI LIBRARY - EUGENEWU STYLE (FULL CODE)
+-- 🛠️ BAGIAN 1: CORE LIBRARY (Ini yang nanti kamu upload ke GitHub Raw)
 -- =====================================================================
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -7,15 +7,14 @@ local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui
 
 local FarmingLibrary = {}
 
--- 🎨 TEMA WARNA (Navy Blue ala EugeneWu Hub)
 local Theme = {
-    MainBG = Color3.fromRGB(24, 24, 34),       -- Navy sangat gelap (Background utama)
-    SidebarBG = Color3.fromRGB(30, 30, 42),    -- Navy sedikit lebih terang (Sidebar)
-    ElementBG = Color3.fromRGB(35, 35, 48),    -- Background Tombol/Elemen
-    HoverBG = Color3.fromRGB(45, 45, 60),      -- Warna saat mouse di atas elemen
-    Accent = Color3.fromRGB(255, 180, 50),     -- Warna Aksen (Kuning/Oranye Padi)
-    Text = Color3.fromRGB(255, 255, 255),      -- Putih bersih
-    TextDark = Color3.fromRGB(170, 170, 190)   -- Abu-abu terang untuk teks non-aktif
+    MainBG = Color3.fromRGB(24, 24, 34),
+    SidebarBG = Color3.fromRGB(30, 30, 42),
+    ElementBG = Color3.fromRGB(35, 35, 48),
+    HoverBG = Color3.fromRGB(45, 45, 60),
+    Accent = Color3.fromRGB(255, 180, 50),
+    Text = Color3.fromRGB(255, 255, 255),
+    TextDark = Color3.fromRGB(170, 170, 190)
 }
 
 local function Tween(instance, properties, duration)
@@ -24,55 +23,74 @@ local function Tween(instance, properties, duration)
     return tween
 end
 
--- ==========================================
--- 🖥️ FUNGSI MEMBUAT WINDOW UTAMA & TOMBOL BULAT
--- ==========================================
 function FarmingLibrary:CreateWindow(titleText)
     local UIHidden = false
 
-    -- Buat ScreenGui Utama
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "EugeneWuCloneHub"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.Parent = PlayerGui
 
     -- ==========================================
-    -- 🟢 TOMBOL BULAT (FLOATING BUTTON) DI KIRI
+    -- 🟢 TOMBOL BULAT (BISA DIGESER / DRAGGABLE)
     -- ==========================================
     local ToggleButton = Instance.new("ImageButton")
     ToggleButton.Size = UDim2.new(0, 45, 0, 45)
-    ToggleButton.Position = UDim2.new(0, 15, 0.5, -22) -- Di pinggir kiri layar
+    ToggleButton.Position = UDim2.new(0, 15, 0.5, -22) 
     ToggleButton.BackgroundColor3 = Theme.SidebarBG
     ToggleButton.AutoButtonColor = false
     ToggleButton.Parent = ScreenGui
 
-    -- Sudut Bulat Sempurna
     local ToggleCorner = Instance.new("UICorner")
     ToggleCorner.CornerRadius = UDim.new(1, 0)
     ToggleCorner.Parent = ToggleButton
 
-    -- Garis Pinggir Tombol
     local ToggleStroke = Instance.new("UIStroke")
     ToggleStroke.Color = Theme.Accent
     ToggleStroke.Thickness = 2
     ToggleStroke.Parent = ToggleButton
 
-    -- Ikon Padi / Gambar di dalam tombol bulat
     local ToggleIcon = Instance.new("ImageLabel")
     ToggleIcon.Size = UDim2.new(0, 25, 0, 25)
     ToggleIcon.Position = UDim2.new(0.5, -12.5, 0.5, -12.5)
     ToggleIcon.BackgroundTransparency = 1
-    -- Ini ID gambar daun/tanaman sebagai contoh. Kamu bisa ganti angka 6031265976 dengan ID gambar padi milikmu
     ToggleIcon.Image = "rbxassetid://6031265976" 
     ToggleIcon.ImageColor3 = Theme.Accent
     ToggleIcon.Parent = ToggleButton
 
-    -- Animasi saat kursor di atas tombol bulat
     ToggleButton.MouseEnter:Connect(function() Tween(ToggleButton, {BackgroundColor3 = Theme.HoverBG}) end)
     ToggleButton.MouseLeave:Connect(function() Tween(ToggleButton, {BackgroundColor3 = Theme.SidebarBG}) end)
 
+    -- LOGIKA DRAG KHUSUS UNTUK TOMBOL BULAT (Dengan Anti-Misclick)
+    local dragToggle, dragInputToggle, dragStartToggle, startPosToggle
+    local isDraggingToggle = false 
+
+    ToggleButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragToggle = true
+            isDraggingToggle = false
+            dragStartToggle = input.Position
+            startPosToggle = ToggleButton.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragToggle = false end
+            end)
+        end
+    end)
+    ToggleButton.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then dragInputToggle = input end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInputToggle and dragToggle then
+            local delta = input.Position - dragStartToggle
+            if delta.Magnitude > 5 then
+                isDraggingToggle = true -- Jika geser lebih dari 5 pixel, tandai sebagai Dragging
+            end
+            ToggleButton.Position = UDim2.new(startPosToggle.X.Scale, startPosToggle.X.Offset + delta.X, startPosToggle.Y.Scale, startPosToggle.Y.Offset + delta.Y)
+        end
+    end)
+
     -- ==========================================
-    -- 🪟 KANVAS UI UTAMA (MAIN FRAME)
+    -- 🪟 KANVAS UI UTAMA
     -- ==========================================
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
@@ -86,11 +104,13 @@ function FarmingLibrary:CreateWindow(titleText)
     MainCorner.CornerRadius = UDim.new(0, 8)
     MainCorner.Parent = MainFrame
 
-    -- Logika Klik Tombol Bulat untuk Buka/Tutup UI
+    -- Logika Buka/Tutup (Hanya berlaku jika tidak sedang di-drag)
     ToggleButton.MouseButton1Click:Connect(function()
+        if isDraggingToggle then return end -- Batalkan klik jika baru selesai digeser
+        
         UIHidden = not UIHidden
         if UIHidden then
-            Tween(MainFrame, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0, 35, 0.5, 0)}, 0.3)
+            Tween(MainFrame, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(ToggleButton.Position.X.Scale, ToggleButton.Position.X.Offset, ToggleButton.Position.Y.Scale, ToggleButton.Position.Y.Offset)}, 0.3)
             wait(0.3)
             MainFrame.Visible = false
         else
@@ -99,7 +119,7 @@ function FarmingLibrary:CreateWindow(titleText)
         end
     end)
 
-    -- Topbar & Fitur Geser UI
+    -- Topbar & Fitur Geser UI Utama
     local Topbar = Instance.new("Frame")
     Topbar.Size = UDim2.new(1, 0, 0, 40)
     Topbar.BackgroundColor3 = Theme.SidebarBG
@@ -124,7 +144,6 @@ function FarmingLibrary:CreateWindow(titleText)
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.Parent = Topbar
 
-    -- Logika Dragging (Geser Layar)
     local dragging, dragInput, dragStart, startPos
     Topbar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -144,7 +163,6 @@ function FarmingLibrary:CreateWindow(titleText)
         end
     end)
 
-    -- Sidebar (Menu Kiri)
     local Sidebar = Instance.new("Frame")
     Sidebar.Size = UDim2.new(0, 140, 1, -41)
     Sidebar.Position = UDim2.new(0, 0, 0, 41)
@@ -163,7 +181,6 @@ function FarmingLibrary:CreateWindow(titleText)
     SidebarPadding.PaddingRight = UDim.new(0, 10)
     SidebarPadding.Parent = Sidebar
 
-    -- Tempat Halaman Kanan
     local PageContainer = Instance.new("Frame")
     PageContainer.Size = UDim2.new(1, -140, 1, -41)
     PageContainer.Position = UDim2.new(0, 140, 0, 41)
@@ -173,14 +190,11 @@ function FarmingLibrary:CreateWindow(titleText)
     local WindowAPI = {}
     local FirstTab = true
 
-    -- ==========================================
-    -- 📁 FUNGSI MEMBUAT TAB (DENGAN IKON)
-    -- ==========================================
     function WindowAPI:CreateTab(tabName, iconId)
         local TabBtn = Instance.new("TextButton")
         TabBtn.Size = UDim2.new(1, 0, 0, 36)
         TabBtn.BackgroundColor3 = Theme.SidebarBG
-        TabBtn.Text = "" -- Teks dikosongkan karena kita pakai TextLabel terpisah agar sejajar ikon
+        TabBtn.Text = "" 
         TabBtn.AutoButtonColor = false
         TabBtn.Parent = Sidebar
 
@@ -188,16 +202,14 @@ function FarmingLibrary:CreateWindow(titleText)
         TabCorner.CornerRadius = UDim.new(0, 6)
         TabCorner.Parent = TabBtn
 
-        -- Ikon di sebelah kiri Tab
         local TabIcon = Instance.new("ImageLabel")
         TabIcon.Size = UDim2.new(0, 18, 0, 18)
         TabIcon.Position = UDim2.new(0, 10, 0.5, -9)
         TabIcon.BackgroundTransparency = 1
-        TabIcon.Image = iconId or "rbxassetid://6031265976" -- Default icon
+        TabIcon.Image = iconId or "rbxassetid://6031265976" 
         TabIcon.ImageColor3 = Theme.TextDark
         TabIcon.Parent = TabBtn
 
-        -- Teks Tab
         local TabText = Instance.new("TextLabel")
         TabText.Size = UDim2.new(1, -35, 1, 0)
         TabText.Position = UDim2.new(0, 35, 0, 0)
@@ -209,7 +221,6 @@ function FarmingLibrary:CreateWindow(titleText)
         TabText.TextXAlignment = Enum.TextXAlignment.Left
         TabText.Parent = TabBtn
 
-        -- Halaman Tab
         local TabPage = Instance.new("ScrollingFrame")
         TabPage.Size = UDim2.new(1, 0, 1, 0)
         TabPage.BackgroundTransparency = 1
@@ -231,7 +242,6 @@ function FarmingLibrary:CreateWindow(titleText)
         PagePadding.PaddingBottom = UDim.new(0, 15)
         PagePadding.Parent = TabPage
 
-        -- Jika ini tab pertama, buat jadi warna aktif (Aksen)
         if FirstTab then
             FirstTab = false
             TabBtn.BackgroundColor3 = Theme.Accent
@@ -239,7 +249,6 @@ function FarmingLibrary:CreateWindow(titleText)
             TabIcon.ImageColor3 = Theme.MainBG
         end
 
-        -- Logika Pindah Tab
         TabBtn.MouseButton1Click:Connect(function()
             for _, child in pairs(PageContainer:GetChildren()) do
                 if child:IsA("ScrollingFrame") then child.Visible = false end
@@ -259,9 +268,6 @@ function FarmingLibrary:CreateWindow(titleText)
 
         local TabAPI = {}
 
-        -- ==========================================
-        -- 🏷️ SECTION HEADER (Tulisan Kuning Pemisah)
-        -- ==========================================
         function TabAPI:CreateSection(secName)
             local SecLabel = Instance.new("TextLabel")
             SecLabel.Size = UDim2.new(1, 0, 0, 20)
@@ -274,9 +280,6 @@ function FarmingLibrary:CreateWindow(titleText)
             SecLabel.Parent = TabPage
         end
 
-        -- ==========================================
-        -- 🔘 BUTTON
-        -- ==========================================
         function TabAPI:CreateButton(btnName, callback)
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1, 0, 0, 40)
@@ -298,9 +301,6 @@ function FarmingLibrary:CreateWindow(titleText)
             Btn.MouseButton1Click:Connect(function() pcall(callback) end)
         end
 
-        -- ==========================================
-        -- 🎚️ TOGGLE (ON/OFF)
-        -- ==========================================
         function TabAPI:CreateToggle(tglName, default, callback)
             local state = default or false
 
@@ -363,44 +363,21 @@ end
 
 
 -- =====================================================================
--- 🚀 AREA EKSEKUSI (BISA LANGSUNG DITES!)
+-- 🚀 BAGIAN 2: AREA EKSEKUSI (PROJECT-SPECIFIC SCRIPT)
+-- Di masa depan, Bagian 1 di atas akan dipanggil pakai Loadstring.
+-- Kamu hanya perlu menulis kode mulai dari baris di bawah ini!
 -- =====================================================================
 
--- 1. Buat Window Utama
-local Window = FarmingLibrary:CreateWindow("⚡ EUGENEWU HUB CLONE")
+local Window = FarmingLibrary:CreateWindow("⚡ PROJECT BARUKU")
 
--- 2. Buat Tab (Format: Nama Tab, ID Ikon Gambar)
--- ID "3926305904" itu ID bawaan Roblox, kamu bebas ganti dengan URL rbxassetid punyamu
 local TabInfo = Window:CreateTab("Info", "rbxassetid://3926305904")
 local TabFarm = Window:CreateTab("Farm", "rbxassetid://3926307971")
 local TabShop = Window:CreateTab("Shop", "rbxassetid://3926305904")
 
--- =====================================
--- MENGISI TAB INFO
--- =====================================
-TabInfo:CreateSection("EUGENEWU HUB")
+-- Isi Tab
+TabInfo:CreateSection("EUGENEWU HUB CLONE")
+TabInfo:CreateButton("Script auto farming lengkap untuk game", function() end)
 
-TabInfo:CreateButton("Script auto farming lengkap untuk game bertani...", function()
-    -- Hanya tombol sebagai info (bisa diabaikan)
-end)
-
--- =====================================
--- MENGISI TAB FARM
--- =====================================
 TabFarm:CreateSection("Fitur Utama Farming")
-
-TabFarm:CreateToggle("Farm — Kontrol manual", false, function(state)
-    print("Manual Farm:", state)
-end)
-
-TabFarm:CreateToggle("Full Auto — Plant+Harvest+Sell", true, function(state)
-    print("Full Auto Farm:", state)
-end)
-
-TabFarm:CreateToggle("Teleport — Pindah Kebun", false, function(state)
-    print("Teleport Kebun:", state)
-end)
-
-TabFarm:CreateButton("Burst Plant — Semua biji 1 frame!", function()
-    print("Mengeksekusi ledakan penanaman...")
-end)
+TabFarm:CreateToggle("Farm — Kontrol manual", false, function(state) print("Manual Farm:", state) end)
+TabFarm:CreateToggle("Full Auto — Plant+Harvest+Sell", true, function(state) print("Full Auto Farm:", state) end)
