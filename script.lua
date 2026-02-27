@@ -1,27 +1,19 @@
--- Memuat Library dari GitHub
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/new.lua"))()
 
--- 1. Inisialisasi Window Utama
-local Window = Library.new({
-    Title = "He ZhuShi Premium", -- Menggunakan nickname kamu
-    Subtitle = "V2.4 Lite Edition",
-    Theme = "Dark"
-})
+local Window = Library:CreateWindow("Testing UI Lite", "Ocean") -- Tema: DarkTheme, BloodTheme, Ocean, TokyoNight
 
--- 2. Menambah Tab (misalnya untuk game Fish It atau Lost Saga)
-local MainTab = Window:AddTab("Main Menu")
-local MiscTab = Window:AddTab("Misc")
+-- Contoh Tab
+local Tab = Window:CreateTab("Main", "rbxassetid://6031265976") -- Gunakan Icon ID jika perlu
 
--- 3. Menambahkan Elemen ke dalam Tab
-MainTab:AddToggle("Auto Clicker", false, function(v)
-    print("Status: ", v)
+Tab:CreateSection("Settings")
+Tab:CreateButton("Test Button", function()
+    print("Tombol ditekan!")
 end)
 
-MainTab:AddButton("Teleport to Base", function()
-    print("Teleporting...")
+Tab:CreateToggle("Auto Farm", false, function(state)
+    print("Toggle state:", state)
 end)
 
--- 4. Contoh Notification / Toast (Jika fiturnya ada di script GitHub kamu)
--- Library:Toast({Title = "Success", Message = "Script Loaded!", Type = "Success"})
-
-print("UI Berhasil Dimuat!")
+Tab:CreateSlider("Speed", 1, 100, 16, function(val)
+    print("Speed:", val)
+end)
