@@ -7,19 +7,20 @@ local UserInputService = game:GetService("UserInputService")
 local FarmingLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/newui.lua"))()
 
 -- MEMBUAT WINDOW MENGGUNAKAN UI BARU
-local Window = FarmingLibrary:CreateWindow("He ZhuShi Hub", "TokyoNight") -- Tema bisa diganti: EugeneWu, Midnight, dll
+local Window = FarmingLibrary:CreateWindow("He ZhuShi Hub", "TokyoNight")
 local Tab1 = Window:CreateTab("Main Menu", "rbxassetid://6031265976")
 
-Tab1:CreateSection("Player Settings")
+-- =====================================================================
+-- === SECTION 1: FLY & NOCLIP ===
+-- =====================================================================
+Tab1:CreateSection("Fly Settings")
 
--- === VARIABEL UNTUK FLY & NOCLIP ===
 local isFlying = false
 local flySpeed = 50
 local flyConnection = nil
 local bv = nil
 local bg = nil
 
--- Fungsi untuk memulai Fly + Noclip
 local function startFly()
     local player = Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
@@ -45,7 +46,6 @@ local function startFly()
     flyConnection = RunService.RenderStepped:Connect(function()
         if not isFlying or not char:FindFirstChild("HumanoidRootPart") then return end
 
-        -- Logika Noclip (Tembus Objek)
         for _, part in ipairs(char:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide then
                 part.CanCollide = false
@@ -64,7 +64,6 @@ local function startFly()
     end)
 end
 
--- Fungsi untuk menghentikan Fly & Noclip
 local function stopFly()
     isFlying = false
     local player = Players.LocalPlayer
@@ -80,7 +79,6 @@ local function stopFly()
     if flyConnection then flyConnection:Disconnect() flyConnection = nil end
 end
 
--- 1. Toggle Fly
 Tab1:CreateToggle("Fly + Noclip", false, function(state)
     if state then
         startFly()
@@ -89,53 +87,92 @@ Tab1:CreateToggle("Fly + Noclip", false, function(state)
     end
 end)
 
--- 2. Slider Kecepatan Fly
 Tab1:CreateSlider("Fly Speed", 10, 300, 50, function(value)
     flySpeed = value
 end)
 
+-- =====================================================================
+-- === SECTION 2: MOVEMENT (SPRINT & JUMP) ===
+-- =====================================================================
+Tab1:CreateSection("Movement Settings")
+
+local customWalkSpeedEnabled = false
+local walkSpeedValue = 16 -- Kecepatan normal roblox
+
+local customJumpEnabled = false
+local jumpPowerValue = 50 -- Kekuatan lompat normal roblox
+
+-- Toggle & Slider Sprint
+Tab1:CreateToggle("Enable Custom Sprint", false, function(state)
+    customWalkSpeedEnabled = state
+end)
+
+Tab1:CreateSlider("Sprint Speed", 10, 300, 16, function(value)
+    walkSpeedValue = value
+end)
+
+-- Toggle & Slider Jump
+Tab1:CreateToggle("Enable Custom Jump", false, function(state)
+    customJumpEnabled = state
+end)
+
+Tab1:CreateSlider("Jump Power", 10, 500, 50, function(value)
+    jumpPowerValue = value
+end)
+
+-- Loop untuk memastikan Sprint & Jump tidak di-reset oleh game
+RunService.Heartbeat:Connect(function()
+    local player = Players.LocalPlayer
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChild("Humanoid")
+        if humanoid then
+            if customWalkSpeedEnabled then
+                humanoid.WalkSpeed = walkSpeedValue
+            end
+            if customJumpEnabled then
+                humanoid.UseJumpPower = true -- Memaksa game menggunakan sistem JumpPower
+                humanoid.JumpPower = jumpPowerValue
+            end
+        end
+    end
+end)
 
 -- =====================================================================
--- === VARIABEL & LOGIKA FAST CLICK (TAHAN MOUSE) ===
+-- === SECTION 3: AUTO CLICKER (MINING) ===
 -- =====================================================================
 Tab1:CreateSection("Auto Clicker (Mining)")
 
 local autoClickEnabled = false
 local isHoldingMouse = false
-local clickDelay = 0.01 -- Jeda default memukul (0.01 detik)
+local clickDelay = 0.01 
 
--- 3. Toggle Fast Click
 Tab1:CreateToggle("Fast Click (Tahan Kiri)", false, function(state)
     autoClickEnabled = state
 end)
 
--- 4. Slider Kecepatan Click (Mengatur Delay)
 Tab1:CreateSlider("Jeda Pukulan (Detik)", 0, 100, 1, function(value)
     clickDelay = value / 100
     if clickDelay <= 0 then clickDelay = 0.01 end 
 end)
 
--- Mendeteksi saat mouse ditekan dan dilepas
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         isHoldingMouse = true
         
-        -- Looping selama tombol ditahan dan toggle aktif
         while isHoldingMouse and autoClickEnabled do
             local player = Players.LocalPlayer
             local char = player.Character
             
             if char then
-                -- Mencari Tool/Item yang sedang dipegang karakter
                 local tool = char:FindFirstChildOfClass("Tool")
                 if tool then
-                    tool:Activate() -- Memerintahkan tool untuk memukul
+                    tool:Activate() 
                 end
             end
 
-            -- Menunggu sesuai pengaturan Slider sebelum memukul lagi
             task.wait(clickDelay)
         end
     end
