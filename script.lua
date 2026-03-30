@@ -1,14 +1,13 @@
--- =====================================================================
--- ⚙️ SCRIPT FUNGSI (FLY, NOCLIP, FAST CLICK) UNTUK UI BARU
--- =====================================================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 
+-- Memuat UI Library BARU dari GitHub (newui.lua)
+local FarmingLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/newui.lua"))()
+
 -- MEMBUAT WINDOW MENGGUNAKAN UI BARU
--- (Pastikan fungsi ini dipanggil dari variabel FarmingLibrary kamu)
-local Window = FarmingLibrary:CreateWindow("He ZhuShi Hub", "TokyoNight") -- Bisa ganti tema di sini
+local Window = FarmingLibrary:CreateWindow("He ZhuShi Hub", "TokyoNight") -- Tema bisa diganti: EugeneWu, Midnight, dll
 local Tab1 = Window:CreateTab("Main Menu", "rbxassetid://6031265976")
 
 Tab1:CreateSection("Player Settings")
@@ -111,13 +110,9 @@ Tab1:CreateToggle("Fast Click (Tahan Kiri)", false, function(state)
 end)
 
 -- 4. Slider Kecepatan Click (Mengatur Delay)
--- Semakin kecil angkanya, semakin cepat dia memukul batu.
 Tab1:CreateSlider("Jeda Pukulan (Detik)", 0, 100, 1, function(value)
-    -- Karena Slider hanya pakai angka bulat, kita akali pembagiannya.
-    -- Jika di slider 1, maka delay = 0.01 detik (Sangat Cepat)
-    -- Jika di slider 100, maka delay = 1.00 detik (Sangat Lambat)
     clickDelay = value / 100
-    if clickDelay == 0 then clickDelay = 0.01 end -- Mencegah crash (0 detik)
+    if clickDelay <= 0 then clickDelay = 0.01 end 
 end)
 
 -- Mendeteksi saat mouse ditekan dan dilepas
@@ -133,7 +128,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
             local char = player.Character
             
             if char then
-                -- Mencari Tool/Item (Beliung) yang sedang dipegang karakter
+                -- Mencari Tool/Item yang sedang dipegang karakter
                 local tool = char:FindFirstChildOfClass("Tool")
                 if tool then
                     tool:Activate() -- Memerintahkan tool untuk memukul
