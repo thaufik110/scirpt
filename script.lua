@@ -1,35 +1,26 @@
+-- =====================================================================
+-- ⚙️ SCRIPT FUNGSI (FLY, NOCLIP, FAST CLICK) UNTUK UI BARU
+-- =====================================================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 
--- Load UI
-local UILib = loadstring(game:HttpGet("https://raw.githubusercontent.com/thaufik110/libraryzhushi/refs/heads/main/newui.lua"))()
+-- MEMBUAT WINDOW MENGGUNAKAN UI BARU
+-- (Pastikan fungsi ini dipanggil dari variabel FarmingLibrary kamu)
+local Window = FarmingLibrary:CreateWindow("He ZhuShi Hub", "TokyoNight") -- Bisa ganti tema di sini
+local Tab1 = Window:CreateTab("Main Menu", "rbxassetid://6031265976")
 
-local Window = UILib.new({
-    Title = "He ZhuShi Hub",
-    Subtitle = "Premium Edition",
-    Theme = "Dark"
-})
+Tab1:CreateSection("Player Settings")
 
-local Tab1 = Window:AddTab({
-    Name = "Main Menu",
-    Icon = "🏠"
-})
-
-local Section1 = Tab1:AddSection({
-    Title = "Player Settings"
-})
-
--- =========================
--- 🚀 FLY + NOCLIP
--- =========================
+-- === VARIABEL UNTUK FLY & NOCLIP ===
 local isFlying = false
 local flySpeed = 50
 local flyConnection = nil
 local bv = nil
 local bg = nil
 
+-- Fungsi untuk memulai Fly + Noclip
 local function startFly()
     local player = Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
@@ -55,144 +46,101 @@ local function startFly()
     flyConnection = RunService.RenderStepped:Connect(function()
         if not isFlying or not char:FindFirstChild("HumanoidRootPart") then return end
 
-        -- Noclip
+        -- Logika Noclip (Tembus Objek)
         for _, part in ipairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then
+            if part:IsA("BasePart") and part.CanCollide then
                 part.CanCollide = false
             end
         end
 
-        local moveDir = Vector3.new(0,0,0)
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += camera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= camera.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= camera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += camera.CFrame.RightVector end
+        local moveDir = Vector3.new(0, 0, 0)
+        
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camera.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camera.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camera.CFrame.RightVector end
 
         bv.Velocity = moveDir * flySpeed
         bg.CFrame = camera.CFrame
     end)
 end
 
+-- Fungsi untuk menghentikan Fly & Noclip
 local function stopFly()
     isFlying = false
-
     local player = Players.LocalPlayer
     local char = player.Character
-
+    
     if char then
         local humanoid = char:FindFirstChild("Humanoid")
         if humanoid then humanoid.PlatformStand = false end
     end
-
+    
     if bv then bv:Destroy() bv = nil end
     if bg then bg:Destroy() bg = nil end
     if flyConnection then flyConnection:Disconnect() flyConnection = nil end
 end
 
--- Toggle Fly
-Section1:AddToggle({
-    Text = "Fly + Noclip",
-    Default = false,
-    Callback = function(state)
-        if state then
-            startFly()
-            Window:Toast({Message = "Fly Activated!", Duration = 2})
-        else
-            stopFly()
-            Window:Toast({Message = "Fly Deactivated!", Duration = 2})
-        end
+-- 1. Toggle Fly
+Tab1:CreateToggle("Fly + Noclip", false, function(state)
+    if state then
+        startFly()
+    else
+        stopFly()
     end
-})
+end)
 
--- Slider Fly Speed
-Section1:AddSlider({
-    Text = "Fly Speed",
-    Default = 50,
-    Min = 10,
-    Max = 300,
-    Callback = function(value)
-        flySpeed = value
-    end
-})
+-- 2. Slider Kecepatan Fly
+Tab1:CreateSlider("Fly Speed", 10, 300, 50, function(value)
+    flySpeed = value
+end)
 
--- Button Speed +
-Section1:AddButton({
-    Text = "Tambah Speed +10",
-    Callback = function()
-        flySpeed = math.clamp(flySpeed + 10, 10, 300)
-        Window:Toast({Message = "Fly Speed: "..flySpeed, Duration = 1})
-    end
-})
 
--- Button Speed -
-Section1:AddButton({
-    Text = "Kurangi Speed -10",
-    Callback = function()
-        flySpeed = math.clamp(flySpeed - 10, 10, 300)
-        Window:Toast({Message = "Fly Speed: "..flySpeed, Duration = 1})
-    end
-})
+-- =====================================================================
+-- === VARIABEL & LOGIKA FAST CLICK (TAHAN MOUSE) ===
+-- =====================================================================
+Tab1:CreateSection("Auto Clicker (Mining)")
 
--- =========================
--- ⚡ FAST CLICK
--- =========================
 local autoClickEnabled = false
 local isHoldingMouse = false
-local clickDelay = 0.01
+local clickDelay = 0.01 -- Jeda default memukul (0.01 detik)
 
--- Toggle Fast Click
-Section1:AddToggle({
-    Text = "Fast Click (Tahan Kiri)",
-    Default = false,
-    Callback = function(state)
-        autoClickEnabled = state
-        Window:Toast({Message = "Fast Click "..(state and "ON" or "OFF"), Duration = 2})
-    end
-})
+-- 3. Toggle Fast Click
+Tab1:CreateToggle("Fast Click (Tahan Kiri)", false, function(state)
+    autoClickEnabled = state
+end)
 
--- Slider Speed Click
-Section1:AddSlider({
-    Text = "Click Speed",
-    Default = 0.01,
-    Min = 0.001,
-    Max = 0.05,
-    Callback = function(value)
-        clickDelay = value
-    end
-})
+-- 4. Slider Kecepatan Click (Mengatur Delay)
+-- Semakin kecil angkanya, semakin cepat dia memukul batu.
+Tab1:CreateSlider("Jeda Pukulan (Detik)", 0, 100, 1, function(value)
+    -- Karena Slider hanya pakai angka bulat, kita akali pembagiannya.
+    -- Jika di slider 1, maka delay = 0.01 detik (Sangat Cepat)
+    -- Jika di slider 100, maka delay = 1.00 detik (Sangat Lambat)
+    clickDelay = value / 100
+    if clickDelay == 0 then clickDelay = 0.01 end -- Mencegah crash (0 detik)
+end)
 
--- Preset Super Cepat
-Section1:AddButton({
-    Text = "Max Click (Mining)",
-    Callback = function()
-        clickDelay = 0.001
-        Window:Toast({Message = "Max Speed Aktif!", Duration = 2})
-    end
-})
-
--- Detect Mouse Hold
+-- Mendeteksi saat mouse ditekan dan dilepas
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-
+    
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         isHoldingMouse = true
-
+        
+        -- Looping selama tombol ditahan dan toggle aktif
         while isHoldingMouse and autoClickEnabled do
             local player = Players.LocalPlayer
             local char = player.Character
-
+            
             if char then
+                -- Mencari Tool/Item (Beliung) yang sedang dipegang karakter
                 local tool = char:FindFirstChildOfClass("Tool")
                 if tool then
-                    tool:Activate()
+                    tool:Activate() -- Memerintahkan tool untuk memukul
                 end
             end
 
-            pcall(function()
-                mouse1click()
-            end)
-
+            -- Menunggu sesuai pengaturan Slider sebelum memukul lagi
             task.wait(clickDelay)
         end
     end
@@ -203,11 +151,3 @@ UserInputService.InputEnded:Connect(function(input)
         isHoldingMouse = false
     end
 end)
-
--- =========================
--- 🔔 NOTIF AWAL
--- =========================
-Window:Toast({
-    Message = "Script Loaded Successfully!",
-    Duration = 3
-})
