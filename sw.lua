@@ -15,16 +15,15 @@ local TabFarm = Window:CreateTab("Main Farm", "rbxassetid://6031265976")
 local TabPlayer = Window:CreateTab("Player", "rbxassetid://6031265976")
 
 -- =====================================================================
--- 🟡 TAB 1: AUTO FARM (THE CORE LOOP)
+-- 🟡 TAB 1: AUTO FARM (THE CORE LOOP) - AMAN DARI VOID
 -- =====================================================================
 TabFarm:CreateSection("Auto Farming OP")
 
 local autoSwing = false
-local autoWater = false
 local autoCollect = false
 
--- 1. AUTO TEBANG (Terbukti Berhasil)
-TabFarm:CreateToggle("1. Auto Swing Axe", false, function(state)
+-- 1. AUTO TEBANG (Tetap Dipertahankan Karena Sangat OP)
+TabFarm:CreateToggle("1. Auto Swing Axe (OP)", false, function(state)
     autoSwing = state
     if autoSwing then
         task.spawn(function()
@@ -32,30 +31,14 @@ TabFarm:CreateToggle("1. Auto Swing Axe", false, function(state)
                 pcall(function()
                     ReplicatedStorage.Remotes.AxeSwing:FireServer()
                 end)
-                task.wait(0.01) -- Spam super cepat
+                task.wait(0.01)
             end
         end)
     end
 end)
 
--- 2. AUTO SIRAM (Tebakan Argumen Kosong)
-TabFarm:CreateToggle("2. Auto Water Tree", false, function(state)
-    autoWater = state
-    if autoWater then
-        task.spawn(function()
-            while autoWater do
-                pcall(function()
-                    -- Coba tembak kosong dulu
-                    ReplicatedStorage.Remotes.ClickWateringCan:FireServer()
-                end)
-                task.wait(0.1)
-            end
-        end)
-    end
-end)
-
--- 3. AUTO COLLECT (Strategi Fisika & TouchInterest)
-TabFarm:CreateToggle("3. Auto Magnet Drops", false, function(state)
+-- 2. AUTO COLLECT V2 (Anti-Void & Fake Touch)
+TabFarm:CreateToggle("2. Auto Collect Drops", false, function(state)
     autoCollect = state
     if autoCollect then
         task.spawn(function()
@@ -65,29 +48,41 @@ TabFarm:CreateToggle("3. Auto Magnet Drops", false, function(state)
                     if char and char:FindFirstChild("HumanoidRootPart") then
                         local hrp = char.HumanoidRootPart
                         
-                        -- Menggeledah seluruh Workspace mencari barang yang bisa dipungut
+                        -- Menggeledah benda di map
                         for _, obj in ipairs(Workspace:GetDescendants()) do
-                            -- Syarat: Objek berupa Part fisik DAN punya fungsi sentuh (TouchInterest)
+                            -- Syarat 1: Harus BasePart dan punya TouchInterest
                             if obj:IsA("BasePart") and obj:FindFirstChild("TouchInterest") then
-                                -- Teleport barang tersebut ke badan pemain
-                                obj.CFrame = hrp.CFrame
-                                
-                                -- Sekaligus mencoba menembak Remote CollectCoin dengan argumen barang tersebut
-                                ReplicatedStorage.Remotes.CollectCoin:FireServer(obj)
+                                -- Syarat 2 (ANTI-VOID): Ukuran benda tidak boleh lebih besar dari 10
+                                -- Ini mencegah portal atau lantai map ikut ketarik
+                                if obj.Size.X < 10 and obj.Size.Y < 10 and obj.Size.Z < 10 then
+                                    
+                                    -- Mengecek apakah eksekutor (Xeno) mendukung fake touch
+                                    if firetouchinterest then
+                                        -- Memalsukan sentuhan karakter ke barang (Sangat Aman)
+                                        firetouchinterest(hrp, obj, 0) -- Mulai nyentuh
+                                        task.wait(0.01)
+                                        firetouchinterest(hrp, obj, 1) -- Lepas sentuhan
+                                    else
+                                        -- Kalau tidak support, pindahkan barangnya tapi sudah difilter
+                                        obj.CFrame = hrp.CFrame
+                                    end
+                                    
+                                end
                             end
                         end
                     end
                 end)
-                task.wait(0.2) -- Jeda agar game tidak crash karena terlalu banyak teleport barang
+                task.wait(0.5) -- Jeda dinaikkan jadi 0.5 detik agar Xeno tidak ngelag
             end
         end)
     end
 end)
 
-TabFarm:CreateSection("Bantuan Manual")
+TabFarm:CreateSection("Bantuan Manual (Untuk Siram Air)")
 local autoClickEnabled = false
 local isHoldingMouse = false
 
+-- Gunakan ini sambil memegang Watering Can!
 TabFarm:CreateToggle("Fast Click (Tahan Kiri)", false, function(state)
     autoClickEnabled = state
 end)
