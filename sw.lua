@@ -37,45 +37,52 @@ TabFarm:CreateToggle("1. Auto Swing Axe (OP)", false, function(state)
     end
 end)
 
--- 2. AUTO COLLECT V2 (Anti-Void & Fake Touch)
-TabFarm:CreateToggle("2. Auto Collect Drops", false, function(state)
-    autoCollect = state
-    if autoCollect then
-        task.spawn(function()
-            while autoCollect do
-                pcall(function()
-                    local char = Players.LocalPlayer.Character
-                    if char and char:FindFirstChild("HumanoidRootPart") then
-                        local hrp = char.HumanoidRootPart
-                        
-                        -- Menggeledah benda di map
-                        for _, obj in ipairs(Workspace:GetDescendants()) do
-                            -- Syarat 1: Harus BasePart dan punya TouchInterest
-                            if obj:IsA("BasePart") and obj:FindFirstChild("TouchInterest") then
-                                -- Syarat 2 (ANTI-VOID): Ukuran benda tidak boleh lebih besar dari 10
-                                -- Ini mencegah portal atau lantai map ikut ketarik
-                                if obj.Size.X < 10 and obj.Size.Y < 10 and obj.Size.Z < 10 then
-                                    
-                                    -- Mengecek apakah eksekutor (Xeno) mendukung fake touch
-                                    if firetouchinterest then
-                                        -- Memalsukan sentuhan karakter ke barang (Sangat Aman)
-                                        firetouchinterest(hrp, obj, 0) -- Mulai nyentuh
-                                        task.wait(0.01)
-                                        firetouchinterest(hrp, obj, 1) -- Lepas sentuhan
-                                    else
-                                        -- Kalau tidak support, pindahkan barangnya tapi sudah difilter
-                                        obj.CFrame = hrp.CFrame
-                                    end
-                                    
-                                end
-                            end
-                        end
-                    end
-                end)
-                task.wait(0.5) -- Jeda dinaikkan jadi 0.5 detik agar Xeno tidak ngelag
-            end
-        end)
-    end
+-- =====================================================================
+-- 🧪 EKSPERIMEN REMOTE EVENT (TARGET BARU)
+-- =====================================================================
+TabFarm:CreateSection("Eksperimen Remote Event")
+
+-- 1. TapSpeed (Logika: Mungkin ini mengatur kecepatan tap/multiplier koin)
+TabFarm:CreateButton("1. Tes TapSpeed", function()
+    pcall(function()
+        ReplicatedStorage.Remotes.TapSpeed:FireServer()
+        ReplicatedStorage.Remotes.TapSpeed:FireServer(999) -- Berjaga-jaga butuh angka
+    end)
+    print("Mengeksekusi TapSpeed...")
+end)
+
+-- 2. PickUpItem (Logika: Siapa tahu ini cara server mengambil item/koin)
+TabFarm:CreateButton("2. Tes PickUpItem", function()
+    pcall(function()
+        ReplicatedStorage.Remotes.PickUpItem:FireServer()
+    end)
+    print("Mengeksekusi PickUpItem...")
+end)
+
+-- 3. SpawnMutationAdmin (Logika: Admin remote biasanya paling OP)
+TabFarm:CreateButton("3. Tes SpawnMutationAdmin", function()
+    pcall(function()
+        ReplicatedStorage.Remotes.SpawnMutationAdmin:FireServer()
+        ReplicatedStorage.Remotes.SpawnMutationAdmin:FireServer(true)
+    end)
+    print("Mengeksekusi SpawnMutationAdmin...")
+end)
+
+-- 4. UpdateCoinsModule (Logika: Mungkin ini celah buat nambah uang)
+TabFarm:CreateButton("4. Tes UpdateCoinsModule", function()
+    pcall(function()
+        ReplicatedStorage.Remotes.UpdateCoinsModule:FireServer()
+        ReplicatedStorage.Remotes.UpdateCoinsModule:FireServer(9999999) 
+    end)
+    print("Mengeksekusi UpdateCoinsModule...")
+end)
+
+-- 5. CrateUnbox (Logika: Mencoba gacha paksa tanpa beli)
+TabFarm:CreateButton("5. Tes CrateUnbox", function()
+    pcall(function()
+        ReplicatedStorage.Remotes.CrateUnbox:FireServer()
+    end)
+    print("Mengeksekusi CrateUnbox...")
 end)
 
 TabFarm:CreateSection("Bantuan Manual (Untuk Siram Air)")
