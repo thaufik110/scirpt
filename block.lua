@@ -14,7 +14,7 @@ local Window = FarmingLibrary:CreateWindow("He ZhuShi | Brainrot Fishing", "Toky
 local TabFarm = Window:CreateTab("Auto Fishing", "rbxassetid://6031265976")
 
 -- =====================================================================
--- 🟡 TAB 1: FULL AFK SYSTEM (REVISI AUTO KLIK VIRTUAL)
+-- 🟡 TAB 1: FULL AFK SYSTEM (REVISI AUTO KLIK SAJA)
 -- =====================================================================
 TabFarm:CreateSection("🔥 Mesin Pencetak Uang (AFK) 🔥")
 
@@ -27,15 +27,15 @@ TabFarm:CreateToggle("Auto Klik Minigame (Super Cepat)", false, function(state)
         task.spawn(function()
             while autoFish do
                 pcall(function()
-                    -- CARA 1: Spam simulasi klik Kiri Mouse di layar (Sangat ampuh untuk minigame)
-                    VirtualUser:Button1Down(Vector2.new(0,0))
-                    VirtualUser:Button1Up(Vector2.new(0,0))
-                    
-                    -- CARA 2: Tembak kedua Remote sekaligus (Jaga-jaga kalau server mendengarkan salah satunya)
+                    -- Hanya fokus menembakkan remote klik minigame!
+                    -- Lempar pancingan secara manual, dan script akan otomatis
+                    -- memenangkan minigamenya sekejap mata.
                     Remotes.LuckyBlockFishing.MiniGameClick:FireServer()
-                    Remotes.LuckyBlockFishing.MiniGameHitFeedback:FireServer()
                 end)
                 
+                -- Menggunakan task.wait() tanpa angka.
+                -- Ini adalah cara paling aman dan paling cepat di Roblox (berjalan setiap frame/~0.01 detik).
+                -- Jauh lebih cepat dari task.wait(0.05) tapi tidak akan membuat Roblox kamu freeze/crash.
                 task.wait() 
             end
         end)
